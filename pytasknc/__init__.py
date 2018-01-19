@@ -17,13 +17,13 @@ def main():
         curses.noecho()
         curses.cbreak()
         state = init_state(conf, screen)
-        draw.full_draw(conf, state, screen)
+        draw.draw_full(conf, state, screen)
         while screen:
             x = screen.getch()
             action_name = conf["bindings"].get(chr(x))
             action_fn = states.get_action(action_name)
             new_state = action_fn(conf, state)
-            draw.draw_state_updates(conf, state, new_state, screen)
+            draw.draw_diff(conf, state, new_state, screen)
             state = new_state
     except KeyboardInterrupt:
         pass
