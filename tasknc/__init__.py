@@ -6,15 +6,18 @@ from .config import load
 
 def draw(conf, state, screen):
     screen.clear()
+    height, width = screen.getmaxyx()
     title_fmt = ""
     screen.addstr(0, 0, title_fmt)
-    fmt = "{id} {description}"
+    fmt = conf["task_format"]
     for idx, task in enumerate(state.tasks):
         if idx == state.selected:
             text_attr = curses.A_STANDOUT
         else:
             text_attr = 0
-        screen.addstr(1 + idx, 0, fmt.format(**task), text_attr)
+        text = fmt.format(**task)[:width]
+        text += (" " * (width - len(text)))
+        screen.addstr(1 + idx, 0, text, text_attr)
     curses.curs_set(0)
     screen.refresh()
 

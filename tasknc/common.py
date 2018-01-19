@@ -16,7 +16,7 @@ State = namedtuple("State", ["tasks", "selected", "status_msg"])
 
 
 def init_state(conf):
-    return State(task_export("status:pending"), 0, None)
+    return State(task_export("status:pending"), 0, "")
 
 
 def update_state(state, **updates):
