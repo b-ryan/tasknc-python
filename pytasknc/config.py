@@ -9,6 +9,8 @@ DEFAULTS = {
     "bindings": {
         "j": "down",
         "k": "up",
+        "g": "jump_top",
+        "G": "jump_bottom",
     }
 }
 

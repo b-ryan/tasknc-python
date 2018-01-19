@@ -50,9 +50,27 @@ def down(conf, state: State):
     else:
         return {"selected": new_idx}
 
+
+@_action()
+def jump_top(conf, state: State):
+    if state.selected == 0:
+        return {"status_msg": "already at top"}
+    return {"selected": 0, "page_offset": 0}
+
+
+@_action()
+def jump_bottom(conf, state: State):
+    max_idx = len(state.tasks) - 1
+    if state.selected == max_idx:
+        return {"status_msg": "already at bottom"}
+    return {"selected": max_idx,
+            "page_offset": max(0, max_idx - state.page_limit + 1)}
+
 ACTIONS = {
     "up": up,
     "down": down,
+    "jump_top": jump_top,
+    "jump_bottom": jump_bottom,
 }
 
 

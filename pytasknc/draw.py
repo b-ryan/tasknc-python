@@ -7,6 +7,8 @@ def create_lines(conf, state: State):
     lines[0] = " "  # FIXME put a title in there
     for view_idx in range(state.page_limit):
         task_idx = view_idx + state.page_offset
+        if task_idx >= len(state.tasks):
+            break
         task = state.tasks[task_idx]
         text_attr = curses.A_STANDOUT if task_idx == state.selected else 0
         lines[1 + view_idx] = (conf["task_format"].format(**task), text_attr)
