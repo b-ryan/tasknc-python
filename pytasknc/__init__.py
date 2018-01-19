@@ -7,7 +7,7 @@ def init_state(conf, screen):
     tasks = common.task_export(conf["filter"])
     height, width = screen.getmaxyx()
     return states.State(tasks, selected=0, status_msg="", page_offset=0,
-                        width=width, height=height)
+                        page_limit=(height - 2), width=width, height=height)
 
 
 def main():

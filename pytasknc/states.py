@@ -1,9 +1,9 @@
 from functools import wraps
 from collections import namedtuple
 
+TaskWindow = namedtuple("TaskWindow", ["offset", "limit", "selected"])
 State = namedtuple("State", ["tasks", "selected", "status_msg", "page_offset",
-                             "width", "height"])
-NUM_NON_TASK_LINES = 2
+                             "page_limit", "width", "height"])
 
 
 def update_state(state, updates):
@@ -45,7 +45,7 @@ def down(conf, state: State):
     if state.selected == len(state.tasks) - 1:
         return {"status_msg": "already at bottom"}
     new_idx = state.selected + 1
-    if new_idx >= (state.page_offset + state.height - NUM_NON_TASK_LINES):
+    if new_idx >= (state.page_offset + state.page_limit):
         return {"selected": new_idx, "page_offset": state.page_offset + 1}
     else:
         return {"selected": new_idx}

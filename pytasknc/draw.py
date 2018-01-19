@@ -1,11 +1,11 @@
 import curses
-from .states import State, NUM_NON_TASK_LINES
+from .states import State
 
 
 def create_lines(conf, state: State):
     lines = ["" for _ in range(state.height)]
     lines[0] = " "  # FIXME put a title in there
-    for view_idx in range(state.height - NUM_NON_TASK_LINES):
+    for view_idx in range(state.page_limit):
         task_idx = view_idx + state.page_offset
         task = state.tasks[task_idx]
         text_attr = curses.A_STANDOUT if task_idx == state.selected else 0
