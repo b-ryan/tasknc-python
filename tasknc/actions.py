@@ -1,24 +1,36 @@
-from .common import NcursesState
+from functools import wraps
+from .common import update_state, State
 
 
-def no_action(state):
+def _action(fn):
+    @wraps(fn)
+    def wrapped(conf, state):
+        updates = fn(conf, state)
+        if updates:
+            return update_state(state, **updates)
+        return state
+    return wrapped
+
+
+@_action
+def no_action(conf, state):
     pass
 
 
-def up(state: NcursesState):
+@_action
+def up(conf, state: State):
     if state.selected == 0:
-        # TODO warn that they're already there
-        pass
+        return {"status_msg": "already at top"}
     else:
-        state.selected -= 1
+        return {"selected": state.selected - 1}
 
 
-def down(state: NcursesState):
+@_action
+def down(conf, state: State):
     if state.selected == len(state.tasks) - 1:
-        # TODO warn that they're already there
-        pass
+        return {"status_msg": "already at bottom"}
     else:
-        state.selected += 1
+        return {"selected": state.selected + 1}
 
 ACTIONS = {
     "up": up,
@@ -27,8 +39,8 @@ ACTIONS = {
 
 
 def get(name):
-    """Returns a function that accepts an NcursesState object and updates the
+    """Returns a function that accepts config and a state. Returns a new
     state."""
     return ACTIONS.get(name, no_action)
 
-__all__ = ["get", "DEFAULT_BINDINGS"]
+__all__ = ["get"]

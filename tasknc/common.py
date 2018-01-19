@@ -1,4 +1,5 @@
 from subprocess import Popen, PIPE
+from collections import namedtuple
 import json
 
 
@@ -11,13 +12,16 @@ def task_export(*task_filters):
         return []
     return json.loads(stdout.decode("utf-8"))
 
+State = namedtuple("State", ["tasks", "selected", "status_msg"])
 
-class NcursesState(object):
-    def __init__(self, conf):
-        self.conf = conf
-        self.selected = 0
-        self.tasks = []
-        self.refresh_tasks()
 
-    def refresh_tasks(self):
-        self.tasks = task_export("status:pending")
+def init_state(conf):
+    return State(task_export("status:pending"), 0, None)
+
+
+def update_state(state, **updates):
+    kwargs = state._asdict()
+    kwargs.update(updates)
+    return State(**kwargs)
+
+__all__ = ["State", "init_state", "update_state"]
