@@ -1,17 +1,23 @@
 from functools import wraps
-from .common import update_state, State
+from collections import namedtuple
+
+State = namedtuple("State", ["tasks", "selected", "status_msg", "max_tasks"])
+
+
+def update_state(state, updates):
+    kwargs = state._asdict()
+    kwargs.update(updates)
+    return State(**kwargs)
 
 
 def _action(*, clear_status_msg=True):
     def wrapper(fn):
         @wraps(fn)
         def wrapped(conf, state):
-            updates = fn(conf, state)
+            updates = (fn(conf, state) or {})
             if clear_status_msg and "status_msg" not in updates:
                 updates["status_msg"] = ""
-            if updates:
-                return update_state(state, **updates)
-            return state
+            return update_state(state, updates)
         return wrapped
     return wrapper
 
@@ -42,9 +48,7 @@ ACTIONS = {
 }
 
 
-def get(name):
-    """Returns a function that accepts config and a state. Returns a new
-    state."""
+def get_action(name):
+    """Returns an action function, which is a function that accepts a config
+    and a state and returns a dict of things to change in the state."""
     return ACTIONS.get(name, no_action)
-
-__all__ = ["get"]
