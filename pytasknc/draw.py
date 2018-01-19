@@ -1,34 +1,34 @@
 import curses
-from .states import State
+from .states import State, NUM_NON_TASK_LINES
 
 
-def create_screen_lines(conf, state, height):
-    lines = ["" for _ in range(height)]
+def create_lines(conf, state: State):
+    lines = ["" for _ in range(state.height)]
     lines[0] = " "  # FIXME put a title in there
-    for idx, task in enumerate(state.tasks[:(height - 2)]):
-        text_attr = curses.A_STANDOUT if idx == state.selected else 0
-        lines[1 + idx] = (conf["task_format"].format(**task), text_attr)
+    for view_idx in range(state.height - NUM_NON_TASK_LINES):
+        task_idx = view_idx + state.page_offset
+        task = state.tasks[task_idx]
+        text_attr = curses.A_STANDOUT if task_idx == state.selected else 0
+        lines[1 + view_idx] = (conf["task_format"].format(**task), text_attr)
     lines[-1] = state.status_msg
     return lines
 
 
 def draw_diff(conf, old_state, new_state, screen):
-    height, width = screen.getmaxyx()
-    old_lines = create_screen_lines(conf, old_state, height)
-    new_lines = create_screen_lines(conf, new_state, height)
+    old_lines = create_lines(conf, old_state) if old_state else []
+    new_lines = create_lines(conf, new_state)
     for idx, line in enumerate(new_lines):
-        if line == old_lines[idx]:
+        if old_lines and line == old_lines[idx]:
             continue
         if isinstance(line, tuple):
             line, text_attr = line
         else:
             text_attr = 0
-        trimmed = line[:width]
-        padded = trimmed + (" " * (width - len(trimmed) - 1))
+        trimmed = line[:new_state.width]
+        padded = trimmed + (" " * (new_state.width - len(trimmed) - 1))
         screen.addstr(idx, 0, padded, text_attr)
     curses.curs_set(0)
 
 
 def draw_full(conf, state, screen):
-    old_state = State([], 0, "", 0)
-    draw_diff(conf, old_state, state, screen)
+    draw_diff(conf, None, state, screen)

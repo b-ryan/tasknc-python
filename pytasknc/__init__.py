@@ -4,10 +4,10 @@ from . import common, states, config, draw
 
 
 def init_state(conf, screen):
-    height, _ = screen.getmaxyx()
     tasks = common.task_export(conf["filter"])
-    return states.State(tasks, selected=0, status_msg="",
-                       max_tasks=(height - 2))
+    height, width = screen.getmaxyx()
+    return states.State(tasks, selected=0, status_msg="", page_offset=0,
+                        width=width, height=height)
 
 
 def main():

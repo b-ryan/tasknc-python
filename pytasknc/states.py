@@ -1,7 +1,9 @@
 from functools import wraps
 from collections import namedtuple
 
-State = namedtuple("State", ["tasks", "selected", "status_msg", "max_tasks"])
+State = namedtuple("State", ["tasks", "selected", "status_msg", "page_offset",
+                             "width", "height"])
+NUM_NON_TASK_LINES = 2
 
 
 def update_state(state, updates):
@@ -31,16 +33,22 @@ def no_action(conf, state):
 def up(conf, state: State):
     if state.selected == 0:
         return {"status_msg": "already at top"}
+    new_idx = state.selected - 1
+    if new_idx < state.page_offset:
+        return {"selected": new_idx, "page_offset": state.page_offset - 1}
     else:
-        return {"selected": state.selected - 1}
+        return {"selected": new_idx}
 
 
 @_action()
 def down(conf, state: State):
-    if state.selected == state.max_tasks - 1:
+    if state.selected == len(state.tasks) - 1:
         return {"status_msg": "already at bottom"}
+    new_idx = state.selected + 1
+    if new_idx >= (state.page_offset + state.height - NUM_NON_TASK_LINES):
+        return {"selected": new_idx, "page_offset": state.page_offset + 1}
     else:
-        return {"selected": state.selected + 1}
+        return {"selected": new_idx}
 
 ACTIONS = {
     "up": up,
