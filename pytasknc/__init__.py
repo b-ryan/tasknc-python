@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import curses
 from . import common, actions, config
-from .config import load
 
 
 def draw(conf, state, screen):
@@ -10,7 +9,8 @@ def draw(conf, state, screen):
     title_fmt = ""
     screen.addstr(0, 0, title_fmt)
     fmt = conf["task_format"]
-    for idx, task in enumerate(state.tasks):
+    max_tasks = height - 2
+    for idx, task in enumerate(state.tasks[:max_tasks]):
         if idx == state.selected:
             text_attr = curses.A_STANDOUT
         else:
@@ -18,17 +18,25 @@ def draw(conf, state, screen):
         text = fmt.format(**task)[:width]
         text += (" " * (width - len(text)))
         screen.addstr(1 + idx, 0, text, text_attr)
+    screen.addstr(height - 1, 0, state.status_msg)
     curses.curs_set(0)
     screen.refresh()
 
 
+def init_state(conf, screen):
+    height, _ = screen.getmaxyx()
+    tasks = common.task_export(conf["filter"])
+    return common.State(tasks, selected=0, status_msg="",
+                        max_tasks=(height - 2))
+
+
 def main():
     conf = config.load("config.yml")
-    state = common.init_state(conf)
     try:
         screen = curses.initscr()
         curses.noecho()
         curses.cbreak()
+        state = init_state(conf, screen)
         draw(conf, state, screen)
         while screen:
             x = screen.getch()
@@ -38,5 +46,7 @@ def main():
             if state != new_state:
                 draw(conf, new_state, screen)
                 state = new_state
+    except KeyboardInterrupt:
+        pass
     finally:
         curses.endwin()

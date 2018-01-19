@@ -4,7 +4,8 @@ import yaml
 
 DEFAULTS = {
     # https://docs.python.org/3.3/library/string.html#formatspec
-    "task_format": "{id:<3} {description}",
+    "filter": "status:pending",
+    "task_format": " {id:<3} {description}",
     "bindings": {
         "j": "down",
         "k": "up",

@@ -3,8 +3,8 @@ from collections import namedtuple
 import json
 
 
-def task_export(*task_filters):
-    cmd = ["task", "export"] + list(task_filters)
+def task_export(task_filters: str):
+    cmd = ["task", "export"] + task_filters.split()
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     stdout, stderr = p.communicate()
     if p.returncode != 0:
@@ -12,16 +12,10 @@ def task_export(*task_filters):
         return []
     return json.loads(stdout.decode("utf-8"))
 
-State = namedtuple("State", ["tasks", "selected", "status_msg"])
-
-
-def init_state(conf):
-    return State(task_export("status:pending"), 0, "")
+State = namedtuple("State", ["tasks", "selected", "status_msg", "max_tasks"])
 
 
 def update_state(state, **updates):
     kwargs = state._asdict()
     kwargs.update(updates)
     return State(**kwargs)
-
-__all__ = ["State", "init_state", "update_state"]
