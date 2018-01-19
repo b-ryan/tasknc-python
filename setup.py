@@ -2,7 +2,7 @@
 from setuptools import setup
 
 setup(
-    name="tasknc",
+    name="pytasknc",
     version="0.1.0",
     description="NCurses for TaskWarrior",
     author="Buck Ryan",
@@ -13,7 +13,7 @@ setup(
     ],
     entry_points="""
     [console_scripts]
-    tasknc=tasknc:main
+    pytasknc=pytasknc:main
     """,
-    packages=["tasknc"],
+    packages=["pytasknc"],
 )
