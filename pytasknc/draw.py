@@ -2,6 +2,11 @@ import curses
 from .states import State
 
 
+class _fmt_dict(dict):
+    def __missing__(self, key):
+        return ""
+
+
 def create_lines(conf, state: State):
     lines = ["" for _ in range(state.height)]
     lines[0] = " "  # FIXME put a title in there
@@ -9,7 +14,7 @@ def create_lines(conf, state: State):
         task_idx = view_idx + state.page_offset
         if task_idx >= len(state.tasks):
             break
-        task = state.tasks[task_idx]
+        task = _fmt_dict(state.tasks[task_idx])
         text_attr = curses.A_STANDOUT if task_idx == state.selected else 0
         lines[1 + view_idx] = (conf["task_format"].format(**task), text_attr)
     lines[-1] = state.status_msg
