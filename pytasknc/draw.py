@@ -11,18 +11,27 @@ class _fmt_dict(dict):
         return ""
 
 
-def format_task(conf, state, task):
+def format_row(conf, state, row):
     items = []
-    for col in conf["columns"]:
+    for idx, col in enumerate(conf["columns"]):
         width = state.col_widths[col]
         fmt = "{:<" + str(width) + "}"
-        items.append(fmt.format(task.get(col) or ""))
+        items.append(fmt.format(row[idx]))
     return " ".join(items)
+
+
+def format_header(conf, state):
+    return format_row(conf, state, conf["columns"])
+
+
+def format_task(conf, state, task):
+    row = [task.get(col) or "" for col in conf["columns"]]
+    return format_row(conf, state, row)
 
 
 def create_lines(conf, state: State):
     lines = ["" for _ in range(state.height)]
-    lines[0] = " "  # FIXME put a title in there
+    lines[0] = (format_header(conf, state), curses.A_BOLD)
     for view_idx in range(state.page_limit):
         task_idx = view_idx + state.page_offset
         if task_idx >= len(state.tasks):
