@@ -8,9 +8,13 @@ DEFAULTS = {
     "columns": ["id", "project", "description"],
     "bindings": {
         "j": "down",
+        "down": "down",
         "k": "up",
+        "up": "up",
         "g": "jump_top",
+        "home": "jump_top",
         "G": "jump_bottom",
+        "end": "jump_bottom",
     }
 }
 

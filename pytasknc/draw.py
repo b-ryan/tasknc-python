@@ -3,6 +3,7 @@ import logging
 from .states import State
 
 logger = logging.getLogger(__name__)
+NUM_NON_TASK_LINES = 2
 
 
 class _fmt_dict(dict):

@@ -39,8 +39,16 @@ def init_state(conf, screen):
     tasks = common.task_export(conf["filter"])
     height, width = screen.getmaxyx()
     return states.State(tasks, selected=0, status_msg="", page_offset=0,
-                        page_limit=(height - 2), width=width, height=height,
+                        page_limit=(height - draw.NUM_NON_TASK_LINES),
+                        width=width, height=height,
                         col_widths=get_col_widths(conf, tasks, screen))
+
+SPECIAL_KEYS = {
+    49: "home",
+    52: "end",
+    65: "up",
+    66: "down",
+}
 
 
 def main():
@@ -53,7 +61,9 @@ def main():
         draw.draw_full(conf, state, screen)
         while screen:
             x = screen.getch()
-            action_name = conf["bindings"].get(chr(x))
+            logger.debug("key press %s", x)
+            key_name = SPECIAL_KEYS.get(x) or chr(x)
+            action_name = conf["bindings"].get(key_name)
             action_fn = states.get_action(action_name)
             new_state = action_fn(conf, state)
             draw.draw_diff(conf, state, new_state, screen)
