@@ -1,10 +1,22 @@
 import curses
+import logging
 from .states import State
+
+logger = logging.getLogger(__name__)
 
 
 class _fmt_dict(dict):
     def __missing__(self, key):
         return ""
+
+
+def format_task(conf, state, task):
+    items = []
+    for col in conf["columns"]:
+        width = state.col_widths[col]
+        fmt = "{:<" + str(width) + "}"
+        items.append(fmt.format(task.get(col) or ""))
+    return " ".join(items)
 
 
 def create_lines(conf, state: State):
@@ -16,7 +28,7 @@ def create_lines(conf, state: State):
             break
         task = _fmt_dict(state.tasks[task_idx])
         text_attr = curses.A_STANDOUT if task_idx == state.selected else 0
-        lines[1 + view_idx] = (conf["task_format"].format(**task), text_attr)
+        lines[1 + view_idx] = (format_task(conf, state, task), text_attr)
     lines[-1] = state.status_msg
     return lines
 
