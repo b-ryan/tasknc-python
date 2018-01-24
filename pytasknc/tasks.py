@@ -2,7 +2,7 @@ from subprocess import Popen, PIPE
 import json
 
 
-def task_export(task_filters: str):
+def export(task_filters: str):
     cmd = ["task", "export"] + task_filters.split()
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     stdout, stderr = p.communicate()
