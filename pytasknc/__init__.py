@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import curses
 import logging
-from . import tasks, states, config, draw
+from . import taskw, states, actions, config, draw
 
 logging.basicConfig(filename="debug.log", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ def get_col_widths(conf, tasks, screen):
 
 
 def init_state(conf, screen):
-    tasks = tasks.export(conf["filter"])
+    tasks = taskw.export(conf["filter"])
     height, width = screen.getmaxyx()
     return states.State(tasks, selected=0, status_msg="", page_offset=0,
                         page_limit=(height - draw.NUM_NON_TASK_LINES),
@@ -64,7 +64,7 @@ def main():
             logger.debug("key press %s", x)
             key_name = SPECIAL_KEYS.get(x) or chr(x)
             action_name = conf["bindings"].get(key_name)
-            action_fn = states.get_action(action_name)
+            action_fn = actions.get_action(action_name)
             new_state = action_fn(conf, state)
             draw.draw_diff(conf, state, new_state, screen)
             state = new_state
