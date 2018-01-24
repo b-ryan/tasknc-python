@@ -1,6 +1,6 @@
 import curses
 import logging
-from .states import State
+from .models import State
 
 logger = logging.getLogger(__name__)
 NUM_NON_TASK_LINES = 2

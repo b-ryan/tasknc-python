@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import curses
 import logging
-from . import taskw, states, actions, config, draw
+from . import taskw, models, actions, config, draw
 
 logging.basicConfig(filename="debug.log", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ def get_col_widths(conf, tasks, screen):
 def init_state(conf, screen):
     tasks = taskw.export(conf["filter"])
     height, width = screen.getmaxyx()
-    return states.State(tasks, selected=0, status_msg="", page_offset=0,
+    return models.State(tasks, selected=0, status_msg="", page_offset=0,
                         page_limit=(height - draw.NUM_NON_TASK_LINES),
                         width=width, height=height,
                         col_widths=get_col_widths(conf, tasks, screen))

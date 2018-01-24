@@ -1,5 +1,5 @@
 from functools import wraps
-from .states import State, update_state
+from . import models
 
 
 def _action(*, clear_status_msg=True):
@@ -9,7 +9,7 @@ def _action(*, clear_status_msg=True):
             updates = (fn(conf, state) or {})
             if clear_status_msg and "status_msg" not in updates:
                 updates["status_msg"] = ""
-            return update_state(state, updates)
+            return models.update(state, updates)
         return wrapped
     return wrapper
 
@@ -20,7 +20,7 @@ def no_action(conf, state):
 
 
 @_action()
-def up(conf, state: State):
+def up(conf, state: models.State):
     if state.selected == 0:
         return {"status_msg": "already at top"}
     new_idx = state.selected - 1
@@ -31,7 +31,7 @@ def up(conf, state: State):
 
 
 @_action()
-def down(conf, state: State):
+def down(conf, state: models.State):
     if state.selected == len(state.tasks) - 1:
         return {"status_msg": "already at bottom"}
     new_idx = state.selected + 1
@@ -42,14 +42,14 @@ def down(conf, state: State):
 
 
 @_action()
-def jump_top(conf, state: State):
+def jump_top(conf, state: models.State):
     if state.selected == 0:
         return {"status_msg": "already at top"}
     return {"selected": 0, "page_offset": 0}
 
 
 @_action()
-def jump_bottom(conf, state: State):
+def jump_bottom(conf, state: models.State):
     max_idx = len(state.tasks) - 1
     if state.selected == max_idx:
         return {"status_msg": "already at bottom"}
