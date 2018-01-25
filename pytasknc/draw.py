@@ -32,8 +32,8 @@ def format_task(conf, state, task):
 def create_lines(conf, state: State):
     lines = ["" for _ in range(state.height)]
     lines[0] = (format_header(conf, state), curses.A_BOLD)
-    for view_idx in range(state.page_limit):
-        task_idx = view_idx + state.page_offset
+    for view_idx in range(state.page.limit):
+        task_idx = view_idx + state.page.offset
         if task_idx >= len(state.tasks):
             break
         task = _fmt_dict(state.tasks[task_idx])

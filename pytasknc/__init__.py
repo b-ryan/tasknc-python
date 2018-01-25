@@ -10,10 +10,18 @@ logger = logging.getLogger(__name__)
 def init_state(conf, screen):
     tasks = taskw.export(conf["filter"])
     height, width = screen.getmaxyx()
-    return models.State(tasks, selected=0, status_msg="", page_offset=0,
-                        page_limit=(height - draw.NUM_NON_TASK_LINES),
-                        width=width, height=height,
-                        col_widths=grid.get_col_widths(conf, tasks, screen))
+    return models.State(
+        tasks,
+        status_msg="",
+        width=width,
+        height=height,
+        selected=0,
+        page=models.Page(
+            offset=0,
+            limit=(height - draw.NUM_NON_TASK_LINES),
+        ),
+        col_widths=grid.get_col_widths(conf, tasks, screen),
+    )
 
 
 SPECIAL_KEYS = {

@@ -1,11 +1,11 @@
 from collections import namedtuple
 
-TaskWindow = namedtuple("TaskWindow", ["offset", "limit", "selected"])
-State = namedtuple("State", ["tasks", "selected", "status_msg", "page_offset",
-                             "page_limit", "width", "height", "col_widths"])
+Page = namedtuple("Page", ["offset", "limit"])
+State = namedtuple("State", ["tasks", "status_msg", "width", "height",
+                             "col_widths", "selected", "page"])
 
 
-def update(state, updates):
-    kwargs = state._asdict()
-    kwargs.update(updates)
-    return State(**kwargs)
+def update(model, **kwargs):
+    new_kwargs = model._asdict()
+    new_kwargs.update(kwargs)
+    return model.__class__(**new_kwargs)

@@ -1,5 +1,6 @@
 from functools import wraps
 from . import models, taskw, draw, grid
+from .models import update
 
 
 def _action(*, clear_status_msg=True):
@@ -9,7 +10,9 @@ def _action(*, clear_status_msg=True):
             updates = (fn(conf, state, screen) or {})
             if clear_status_msg and "status_msg" not in updates:
                 updates["status_msg"] = ""
-            return models.update(state, updates)
+            if "page" in updates:
+                updates["page"] = update(state.page, **updates["page"])
+            return update(state, **updates)
         return wrapped
     return wrapper
 
@@ -24,8 +27,8 @@ def up(conf, state: models.State, screen):
     if state.selected == 0:
         return {"status_msg": "already at top"}
     new_idx = state.selected - 1
-    if new_idx < state.page_offset:
-        return {"selected": new_idx, "page_offset": state.page_offset - 1}
+    if new_idx < state.page.offset:
+        return {"selected": new_idx, "page": {"offset": state.page.offset - 1}}
     else:
         return {"selected": new_idx}
 
@@ -35,8 +38,8 @@ def down(conf, state: models.State, screen):
     if state.selected == len(state.tasks) - 1:
         return {"status_msg": "already at bottom"}
     new_idx = state.selected + 1
-    if new_idx >= (state.page_offset + state.page_limit):
-        return {"selected": new_idx, "page_offset": state.page_offset + 1}
+    if new_idx >= (state.page.offset + state.page.limit):
+        return {"selected": new_idx, "page": {"offset": state.page.offset + 1}}
     else:
         return {"selected": new_idx}
 
@@ -45,7 +48,7 @@ def down(conf, state: models.State, screen):
 def jump_top(conf, state: models.State, screen):
     if state.selected == 0:
         return {"status_msg": "already at top"}
-    return {"selected": 0, "page_offset": 0}
+    return {"selected": 0, "page": {"offset": 0}}
 
 
 @_action()
@@ -53,23 +56,26 @@ def jump_bottom(conf, state: models.State, screen):
     max_idx = len(state.tasks) - 1
     if state.selected == max_idx:
         return {"status_msg": "already at bottom"}
-    return {"selected": max_idx,
-            "page_offset": max(0, max_idx - state.page_limit + 1)}
+    return {
+        "selected": max_idx,
+        "page":{"offset": max(0, max_idx - state.page.limit + 1)},
+    }
 
 
 @_action(clear_status_msg=False)
 def resize(conf, state: models.State, screen):
     height, width = screen.getmaxyx()
     new_page_limit = height - draw.NUM_NON_TASK_LINES
-    # The selected item may be too far down based on the page limit. If it is,
-    # then move the page_offset down to where the selected item can be seen
-    new_page_offset = max(state.page_offset,
-                          (state.selected - new_page_limit + 1))
     return {
         "width": width,
         "height": height,
-        "page_limit": new_page_limit,
-        "page_offset": new_page_offset,
+        "page": {
+            # The selected item may be too far down after the resize. If it is,
+            # then move the offset to where the selected item can be seen
+            "offset": max(state.page.offset,
+                          (state.selected - new_page_limit + 1)),
+            "limit": new_page_limit,
+        },
         "col_widths": grid.get_col_widths(conf, state.tasks, screen),
     }
 
