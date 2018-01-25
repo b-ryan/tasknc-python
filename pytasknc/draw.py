@@ -47,7 +47,7 @@ def draw_diff(conf, old_state, new_state, screen):
     old_lines = create_lines(conf, old_state) if old_state else []
     new_lines = create_lines(conf, new_state)
     for idx, line in enumerate(new_lines):
-        if old_lines and line == old_lines[idx]:
+        if len(old_lines) > idx and line == old_lines[idx]:
             continue
         if isinstance(line, tuple):
             line, text_attr = line

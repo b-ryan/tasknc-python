@@ -1,38 +1,10 @@
 #!/usr/bin/env python
 import curses
 import logging
-from . import taskw, models, actions, config, draw
+from . import taskw, models, actions, config, draw, grid
 
 logging.basicConfig(filename="debug.log", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-MIN_DESC_WIDTH = 5
-
-
-def column_max_widths(conf, tasks):
-    maxes = {k: 0 for k in conf["columns"]}
-    for task in tasks:
-        for col in conf["columns"]:
-            maxes[col] = max(maxes[col], len(str(task.get(col) or "")))
-    return maxes
-
-
-def column_trimmed_widths(col_widths, total_width):
-    if "description" not in col_widths:
-        return col_widths
-    non_desc_width = 0
-    for col, width in col_widths.items():
-        if col != "description":
-            non_desc_width += width
-    num_spaces = len(col_widths) - 1
-    desc_width = max(MIN_DESC_WIDTH, total_width - non_desc_width - num_spaces)
-    col_widths["description"] = desc_width
-    return col_widths
-
-
-def get_col_widths(conf, tasks, screen):
-    maxes = column_max_widths(conf, tasks)
-    _, total_width = screen.getmaxyx()
-    return column_trimmed_widths(maxes, total_width)
 
 
 def init_state(conf, screen):
@@ -41,13 +13,22 @@ def init_state(conf, screen):
     return models.State(tasks, selected=0, status_msg="", page_offset=0,
                         page_limit=(height - draw.NUM_NON_TASK_LINES),
                         width=width, height=height,
-                        col_widths=get_col_widths(conf, tasks, screen))
+                        col_widths=grid.get_col_widths(conf, tasks, screen))
+
 
 SPECIAL_KEYS = {
     49: "home",
     52: "end",
     65: "up",
     66: "down",
+    curses.KEY_RESIZE: "resize",
+}
+# forced actions are things that are not configurable by the user and generally
+# do not actually correspond to a key press. Instead, they might be the
+# resizing of the screen, which curses communicates to our code as if it were a
+# key press.
+FORCED_ACTIONS = {
+    "resize",
 }
 
 
@@ -61,11 +42,13 @@ def main():
         draw.draw_full(conf, state, screen)
         while screen:
             x = screen.getch()
-            logger.debug("key press %s", x)
             key_name = SPECIAL_KEYS.get(x) or chr(x)
-            action_name = conf["bindings"].get(key_name)
+            action_name = key_name if key_name in FORCED_ACTIONS \
+                else conf["bindings"].get(key_name)
+            logger.debug("key press %s, key_name %s, action name %s",
+                         x, key_name, action_name)
             action_fn = actions.get_action(action_name)
-            new_state = action_fn(conf, state)
+            new_state = action_fn(conf, state, screen)
             draw.draw_diff(conf, state, new_state, screen)
             state = new_state
     except KeyboardInterrupt:
