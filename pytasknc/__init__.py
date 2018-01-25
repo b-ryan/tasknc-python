@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import curses
 import logging
+import argparse
 from . import taskw, models, actions, config, draw, grid
 
-logging.basicConfig(filename="debug.log", level=logging.DEBUG)
+logging.basicConfig(filename="debug.log", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -21,6 +22,7 @@ def init_state(conf, screen):
             limit=(height - draw.NUM_NON_TASK_LINES),
         ),
         col_widths=grid.get_col_widths(conf, tasks, screen),
+        mode="normal",
     )
 
 
@@ -40,24 +42,43 @@ FORCED_ACTIONS = {
 }
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--debug", action="store_true")
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+    logger.info("hi")
     conf = config.load("config.yml")
     try:
         screen = curses.initscr()
         curses.noecho()
         curses.cbreak()
         state = init_state(conf, screen)
-        draw.draw_full(conf, state, screen)
+        draw.draw(conf, state, screen)
         while screen:
-            x = screen.getch()
-            key_name = SPECIAL_KEYS.get(x) or chr(x)
-            action_name = key_name if key_name in FORCED_ACTIONS \
-                else conf["bindings"].get(key_name)
-            logger.debug("key press %s, key_name %s, action name %s",
-                         x, key_name, action_name)
-            action_fn = actions.get_action(action_name)
-            new_state = action_fn(conf, state, screen)
-            draw.draw_diff(conf, state, new_state, screen)
+            if state.mode == "input":
+                curses.echo()
+                try:
+                    response = screen.getstr(state.height - 1, 2)
+                except KeyboardInterrupt:
+                    response = b""
+                curses.noecho()
+                new_state = actions.handle_input(conf, state, screen, response)
+            else:
+                x = screen.getch()
+                key_name = SPECIAL_KEYS.get(x) or chr(x)
+                action_name = key_name if key_name in FORCED_ACTIONS \
+                    else conf["bindings"].get(key_name)
+                logger.debug("key press %s, key_name %s, action name %s",
+                             x, key_name, action_name)
+                action_fn = actions.get_action(action_name)
+                new_state = action_fn(conf, state, screen)
+            draw.draw(conf, new_state, screen, old_state=state)
             state = new_state
     except KeyboardInterrupt:
         pass

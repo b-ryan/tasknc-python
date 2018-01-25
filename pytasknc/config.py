@@ -15,6 +15,7 @@ DEFAULTS = {
         "home": "jump_top",
         "G": "jump_bottom",
         "end": "jump_bottom",
+        ":": "command",
     }
 }
 

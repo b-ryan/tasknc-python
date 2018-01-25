@@ -43,9 +43,9 @@ def create_lines(conf, state: State):
     return lines
 
 
-def draw_diff(conf, old_state, new_state, screen):
+def draw(conf, state, screen, old_state=None):
     old_lines = create_lines(conf, old_state) if old_state else []
-    new_lines = create_lines(conf, new_state)
+    new_lines = create_lines(conf, state)
     for idx, line in enumerate(new_lines):
         if len(old_lines) > idx and line == old_lines[idx]:
             continue
@@ -53,11 +53,7 @@ def draw_diff(conf, old_state, new_state, screen):
             line, text_attr = line
         else:
             text_attr = 0
-        trimmed = line[:new_state.width]
-        padded = trimmed + (" " * (new_state.width - len(trimmed) - 1))
+        trimmed = line[:state.width]
+        padded = trimmed + (" " * (state.width - len(trimmed) - 1))
         screen.addstr(idx, 0, padded, text_attr)
     curses.curs_set(0)
-
-
-def draw_full(conf, state, screen):
-    draw_diff(conf, None, state, screen)

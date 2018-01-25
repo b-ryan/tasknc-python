@@ -2,7 +2,7 @@ from collections import namedtuple
 
 Page = namedtuple("Page", ["offset", "limit"])
 State = namedtuple("State", ["tasks", "status_msg", "width", "height",
-                             "col_widths", "selected", "page"])
+                             "col_widths", "selected", "page", "mode"])
 
 
 def update(model, **kwargs):

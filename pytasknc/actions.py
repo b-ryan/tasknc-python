@@ -1,13 +1,16 @@
+import logging
 from functools import wraps
 from . import models, taskw, draw, grid
 from .models import update
+
+logger = logging.getLogger(__name__)
 
 
 def _action(*, clear_status_msg=True):
     def wrapper(fn):
         @wraps(fn)
-        def wrapped(conf, state, screen):
-            updates = (fn(conf, state, screen) or {})
+        def wrapped(conf, state, screen, *args, **kwargs):
+            updates = (fn(conf, state, screen, *args, **kwargs) or {})
             if clear_status_msg and "status_msg" not in updates:
                 updates["status_msg"] = ""
             if "page" in updates:
@@ -79,12 +82,21 @@ def resize(conf, state: models.State, screen):
         "col_widths": grid.get_col_widths(conf, state.tasks, screen),
     }
 
+
+@_action()
+def command(conf, state: models.State, screen):
+    return {
+        "mode": "input",
+        "status_msg": ":",
+    }
+
 ACTIONS = {
     "up": up,
     "down": down,
     "jump_top": jump_top,
     "jump_bottom": jump_bottom,
     "resize": resize,
+    "command": command,
 }
 
 
@@ -92,3 +104,13 @@ def get_action(name):
     """Returns an action function, which is a function that accepts a config
     and a state and returns a dict of things to change in the state."""
     return ACTIONS.get(name, no_action)
+
+
+@_action()
+def handle_input(conf, state, screen, response: bytes):
+    logger.debug("response %s", response)
+    taskw.execute(response.decode("utf-8"))
+    return {
+        "mode": "normal",
+        "tasks": taskw.export(conf["filter"]),
+    }
