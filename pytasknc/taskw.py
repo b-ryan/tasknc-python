@@ -27,4 +27,3 @@ def execute(command: str):
     if p.returncode != 0:
         logger.error("%s || %s", stdout, stderr)
         # TODO show some warning or something
-        pass

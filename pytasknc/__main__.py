@@ -1,2 +1,2 @@
-from tasknc import main
+from pytasknc import main
 main()

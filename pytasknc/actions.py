@@ -3,6 +3,8 @@ from functools import wraps
 from . import models, taskw, draw, grid
 from .models import update
 
+# pylint: disable=unused-argument
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,8 +34,7 @@ def up(conf, state: models.State, screen):
     new_idx = state.selected - 1
     if new_idx < state.page.offset:
         return {"selected": new_idx, "page": {"offset": state.page.offset - 1}}
-    else:
-        return {"selected": new_idx}
+    return {"selected": new_idx}
 
 
 @_action()
@@ -43,8 +44,7 @@ def down(conf, state: models.State, screen):
     new_idx = state.selected + 1
     if new_idx >= (state.page.offset + state.page.limit):
         return {"selected": new_idx, "page": {"offset": state.page.offset + 1}}
-    else:
-        return {"selected": new_idx}
+    return {"selected": new_idx}
 
 
 @_action()
