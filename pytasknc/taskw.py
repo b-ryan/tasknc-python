@@ -21,7 +21,5 @@ def execute(command: str):
     args = shlex.split(command)
     if not args:
         return
-    cmd = ["task"] + args
-    p = Popen(cmd)
-    p.wait()
+    Popen(["task"] + args).wait()
     input("Press enter to continue")
