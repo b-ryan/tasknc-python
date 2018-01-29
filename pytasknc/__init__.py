@@ -23,6 +23,7 @@ def init_state(conf, screen):
         ),
         col_widths=grid.get_col_widths(conf, tasks, screen),
         mode="normal",
+        execute_command=None,
     )
 
 
@@ -69,6 +70,14 @@ def main():
                     response = b""
                 curses.noecho()
                 new_state = actions.handle_input(conf, state, screen, response)
+            elif state.mode == "execute":
+                curses.endwin()
+                new_state = actions.handle_execute(conf, state, screen)
+                screen = curses.initscr()
+                # Setting the state to None will forced a full draw of the
+                # screen, which is necessary because the previous screen was
+                # just destroyed.
+                state = None
             else:
                 x = screen.getch()
                 key_name = SPECIAL_KEYS.get(x) or chr(x)

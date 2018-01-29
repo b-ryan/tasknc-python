@@ -22,8 +22,6 @@ def execute(command: str):
     if not args:
         return
     cmd = ["task"] + args
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    stdout, stderr = p.communicate()
-    if p.returncode != 0:
-        logger.error("%s || %s", stdout, stderr)
-        # TODO show some warning or something
+    p = Popen(cmd)
+    p.wait()
+    input("Press enter to continue")

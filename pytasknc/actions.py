@@ -109,8 +109,18 @@ def get_action(name):
 @_action()
 def handle_input(conf, state, screen, response: bytes):
     logger.debug("response %s", response)
-    taskw.execute(response.decode("utf-8"))
+    return {
+        "mode": "execute",
+        "execute_command": response.decode("utf-8"),
+    }
+
+
+@_action()
+def handle_execute(conf, state, screen):
+    logger.debug("executing")
+    taskw.execute(state.execute_command)
     return {
         "mode": "normal",
+        "execute_command": None,
         "tasks": taskw.export(conf["filter"]),
     }
