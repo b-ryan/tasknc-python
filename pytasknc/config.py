@@ -1,3 +1,4 @@
+import os
 import copy
 import collections
 import yaml
@@ -30,8 +31,12 @@ def deep_update(d, u):
 
 
 def load(path):
-    with open(path) as f:
-        overrides = (yaml.load(f) or {})
+    # FIXME use some central configuration directory
+    if os.path.exists(path):
+        with open(path) as f:
+            overrides = (yaml.load(f) or {})
+    else:
+        overrides = {}
     conf = copy.deepcopy(DEFAULTS)
     return deep_update(conf, overrides)
 
